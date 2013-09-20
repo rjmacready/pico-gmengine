@@ -1,5 +1,5 @@
 
-out/main: src/main.c out/main-lisp.a src/scripts.c
+out/main: src/main.c out/main-lisp.a src/scripts.c src/pixels.c src/circles.c
 	$(CC) `ecl-config --cflags` -o $@ $^ \
 	      `ecl-config --ldflags` -lecl -lSDL
 

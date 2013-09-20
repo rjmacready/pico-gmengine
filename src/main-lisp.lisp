@@ -1,9 +1,15 @@
 
 (defparameter *game-objects* nil)
 
+
 (defclass drawable () ())
 (defmethod draw ((this drawable))
   nil)
+
+(defclass circle (drawable) (x y radius color))
+(defmethod draw ((this drawable))
+  (with-slots (x y radius color)
+      (draw-circle :screen x y radius color)))
 
 (defclass bmp-drawable (drawable)
   ((bitmap-name)))

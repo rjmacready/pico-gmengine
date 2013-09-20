@@ -26,6 +26,30 @@
   return ECL_T;
   }*/
 
+#define DEFUN(name,fun,args) \
+ cl_def_c_function(c_string_to_object(name), \
+   (cl_objectfn_fixed)fun, \
+		   args)
+
+SDL_Surface* screen = NULL;
+
+void* keyword_to_ptr(cl_object kw) {
+  if(cl_equal(c_string_to_object(":SCREEN"), kw)) {
+    return (void*)screen;
+  }
+  return NULL;
+}
+
+cl_object cl_draw_circle(cl_object surface, 
+		      cl_object x, cl_object y,
+		      cl_object radius, cl_object color) 
+{
+  SDL_Surface* screen = (SDL_Surface*)keyword_to_ptr(surface);
+  if(NULL == screen)
+    FAIL("draw_circle needs a surface!");
+  
+  
+}
 
 int main(int argc, char **argv) {
   int cont = 1;
@@ -35,6 +59,9 @@ int main(int argc, char **argv) {
   extern void init_lib_MAIN_LISP(cl_object);
   ecl_init_module(NULL, init_lib_MAIN_LISP);
 
+  // define C functions. mostly drawing stuff.
+  DEFUN("draw-circle", cl_draw_circle, 2);
+
   // prepare cl stuff
   // * prepare a function-application to call on the game loop
   cl_object run_onupdate = c_string_to_object("(run-onupdate)");
@@ -42,14 +69,14 @@ int main(int argc, char **argv) {
   cl_safe_eval(c_string_to_object("(load-scripts)"), Cnil, Cnil);
 
   // init SDL stuff
-  SDL_Event event;  
-  SDL_Surface* screen = NULL;
+  SDL_Event event;
   SDL_Init( SDL_INIT_EVERYTHING );
 
   screen = SDL_SetVideoMode( 640, 480, 32, SDL_SWSURFACE );
 
   // create game instance and call game.on-startup
   cl_safe_eval(c_string_to_object("(init-game)"), Cnil, Cnil);
+  //cl_funcall(2, c_string_to_object("init-game"), ecl_make_pointer(screen));
   
   while(cont) {
     while( SDL_PollEvent( &event ) ) {
