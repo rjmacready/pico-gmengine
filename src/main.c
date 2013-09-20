@@ -43,12 +43,14 @@ void* keyword_to_ptr(cl_object kw) {
 cl_object cl_draw_circle(cl_object surface, 
 		      cl_object x, cl_object y,
 		      cl_object radius, cl_object color) 
-{
+{  
   SDL_Surface* screen = (SDL_Surface*)keyword_to_ptr(surface);
   if(NULL == screen)
     FAIL("draw_circle needs a surface!");
   
-  
+  int w_x = fix(x), w_y = fix(y), w_radius = fix(radius), w_color = fix(color); 
+
+  draw_circle(screen, w_x, w_y, w_radius, w_color);  
 }
 
 int main(int argc, char **argv) {
@@ -60,11 +62,12 @@ int main(int argc, char **argv) {
   ecl_init_module(NULL, init_lib_MAIN_LISP);
 
   // define C functions. mostly drawing stuff.
-  DEFUN("draw-circle", cl_draw_circle, 2);
+  DEFUN("draw-circle", cl_draw_circle, 5);
 
   // prepare cl stuff
   // * prepare a function-application to call on the game loop
   cl_object run_onupdate = c_string_to_object("(run-onupdate)");
+  cl_object run_ondraw = c_string_to_object("(run-ondraw)");
   // * load scripts
   cl_safe_eval(c_string_to_object("(load-scripts)"), Cnil, Cnil);
 
@@ -77,22 +80,30 @@ int main(int argc, char **argv) {
   // create game instance and call game.on-startup
   cl_safe_eval(c_string_to_object("(init-game)"), Cnil, Cnil);
   //cl_funcall(2, c_string_to_object("init-game"), ecl_make_pointer(screen));
-  
+
+  int frame = 0;  
+  int start_ticks = -1;
   while(cont) {
+    //start_ticks = SDL_GetTicks();
+    
     while( SDL_PollEvent( &event ) ) {
       if(event.type == SDL_QUIT) {
         cont = 0;
       }
     }
 
+    ++frame;
+
     // this is the game loop
     // loop through all game objects and exec stuff something ...
     cl_safe_eval(run_onupdate, Cnil, Cnil);
 
     // draw all stuff
-    
+    cl_safe_eval(run_ondraw, Cnil, Cnil);
 
     SDL_Flip( screen );
+
+    //printf("%f\n", (float)frame / (float)SDL_GetTicks() * 1000);
   }
 
   // do we really need to release stuff? fuck it
