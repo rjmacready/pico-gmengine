@@ -8,7 +8,7 @@
   ())
 
 (defmethod on-update ((this cheela))
-  ;(print "cheela on-update")
-  nil)
+  (with-slots (x) this
+    (setf x (+ (mod (+ x 1) 100) 10))))
 
 (print "cheela loaded")

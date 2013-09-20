@@ -16,7 +16,7 @@
     ;(print y)
     ;(print radius)
     ;(print color)
-    (draw-circle :screen x y radius color)))
+    (draw-circle :screen (floor x) (floor y) radius color)))
 
 ;(defclass bmp-drawable (drawable)
 ;  ((bitmap-name)))

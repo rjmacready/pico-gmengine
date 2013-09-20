@@ -50,7 +50,9 @@ cl_object cl_draw_circle(cl_object surface,
   
   int w_x = fix(x), w_y = fix(y), w_radius = fix(radius), w_color = fix(color); 
 
+  printf("%d %d\n", w_x, w_y);
   draw_circle(screen, w_x, w_y, w_radius, w_color);  
+  printf(".\n");
 }
 
 int main(int argc, char **argv) {
@@ -99,6 +101,8 @@ int main(int argc, char **argv) {
     cl_safe_eval(run_onupdate, Cnil, Cnil);
 
     // draw all stuff
+    SDL_FillRect(screen, &screen->clip_rect, SDL_MapRGB(screen->format, 0x00, 0x00, 0x00));
+
     cl_safe_eval(run_ondraw, Cnil, Cnil);
 
     SDL_Flip( screen );
