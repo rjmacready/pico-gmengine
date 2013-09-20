@@ -15,11 +15,7 @@
 
 ; game loop
 (defun run-onupdate ()
-;  (print "onupdate")
   (loop for x in (slot-value *game* 'game-objects) do (on-update x)))
 
 (defun run-ondraw ()
-;  (print "ondraw")
-;  (print `(game ,*game*))
-;  (print `(game objects ,(slot-value *game* 'game-objects)))
   (loop for x in (slot-value *game* 'game-objects) do (on-draw x)))
