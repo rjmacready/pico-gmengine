@@ -2,6 +2,7 @@
 ; init game instance, run on-startup
 (defparameter *game* nil)
 (defvar *time* nil)
+(defvar *ticks* nil)
 
 ; put here script probing and loading logic
 (defun load-scripts ()
@@ -21,7 +22,8 @@
 	(loop 
 	   for x in game-objects
 	   do (progn
-		(let ((*time* (get-universal-time)))
+		(let ((*time* (get-universal-time))
+		      (*ticks* (get-ticks)))
 		  (on-update x)))))
     (T (e) (print `(error on run-update ,e)))))
 
