@@ -1,6 +1,7 @@
 
 ; init game instance, run on-startup
 (defparameter *game* nil)
+(defvar *time* nil)
 
 ; put here script probing and loading logic
 (defun load-scripts ()
@@ -15,7 +16,18 @@
 
 ; game loop
 (defun run-onupdate ()
-  (loop for x in (slot-value *game* 'game-objects) do (on-update x)))
+  (handler-case 
+      (with-slots (game-objects) *game*
+	(loop 
+	   for x in game-objects
+	   do (progn
+		(let ((*time* (get-universal-time)))
+		  (on-update x)))))
+    (T (e) (print `(error on run-update ,e)))))
 
 (defun run-ondraw ()
-  (loop for x in (slot-value *game* 'game-objects) do (on-draw x)))
+  (handler-case 
+      (with-slots (game-objects) *game*
+;    (print (length game-objects))
+	(loop for x in game-objects do (on-draw x)))
+    (T (e) (print `(error on run-ondraw ,e)))))

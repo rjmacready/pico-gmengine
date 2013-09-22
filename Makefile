@@ -1,9 +1,9 @@
 
-out/main: src/main.c out/main-lisp.a src/scripts.c src/pixels.c src/circles.c
+main: src/main.c main-lisp.a src/scripts.c src/pixels.c src/circles.c
 	$(CC) `ecl-config --cflags` -o $@ $^ \
-	      `ecl-config --ldflags` -lecl -lSDL
+	      `ecl-config --ldflags` -lecl -lSDL -lSDL_image -lSDL_ttf
 
-out/main-lisp.a: src/main-lisp.lisp
+main-lisp.a: src/main-lisp.lisp
 	ecl -norc \
 	    -eval '(require :asdf)' \
 	    -eval '(push "./" asdf:*central-registry*)' \
@@ -11,4 +11,4 @@ out/main-lisp.a: src/main-lisp.lisp
 	    -eval '(quit)'
 
 clean:
-	rm -f out/*
+	rm -f main main-lisp.a

@@ -1,10 +1,12 @@
 //#include "scripts.h"
 #include <ecl/ecl.h>
 #include <SDL/SDL.h>
+#include <SDL/SDL_image.h>
+#include <SDL/SDL_ttf.h>
 
-#define FAIL(msg) \
+#define FAIL(msg)				\
   do { \
-  fprintf(stderr, msg); \
+    fprintf(stderr, msg);			\
   exit(1); \
   } while(0)
 
@@ -40,6 +42,33 @@ void* keyword_to_ptr(cl_object kw) {
   return NULL;
 }
 
+cl_object cl_load_font(cl_object fontname, cl_object size) {
+  //  (void) fontname->string;
+  char *c_fontname = (char*) fontname->string.self;
+  int c_size = fix(size);
+  printf("cl_load_font(%s, %d)\n", c_fontname, c_size);
+
+  TTF_Font* font = TTF_OpenFont(c_fontname, c_size);
+  if(NULL == font) {
+    fprintf(stderr, "TTF Error: %s\n", TTF_GetError());
+    FAIL("Error loading font");
+  }
+  return ecl_make_pointer(font);
+}
+
+cl_object cl_rendertext_solid(cl_object font, cl_object message, cl_object color) {
+  TTF_Font* w_font = ecl_to_pointer(font);
+  char* w_message = (char*) message->string.self;
+  //int w_color = fix(color);
+  SDL_Color w_color = {255, 255, 255};
+  SDL_Surface* ret = TTF_RenderText_Solid(w_font, w_message, w_color);
+  if(NULL == ret) {
+    fprintf(stderr, "TTF Error: %s\n", TTF_GetError());
+    FAIL("Error rendering message");
+  }
+  return ecl_make_pointer(ret);
+}
+
 cl_object cl_draw_circle(cl_object surface, 
 		      cl_object x, cl_object y,
 		      cl_object radius, cl_object color) 
@@ -50,13 +79,35 @@ cl_object cl_draw_circle(cl_object surface,
   
   int w_x = fix(x), w_y = fix(y), w_radius = fix(radius), w_color = fix(color); 
 
-  printf("%d %d\n", w_x, w_y);
-  draw_circle(screen, w_x, w_y, w_radius, w_color);  
-  printf(".\n");
+  draw_circle(screen, w_x, w_y, w_radius, w_color);
 }
 
+cl_object cl_draw_surface(cl_object d_surface, cl_object d_x, cl_object d_y,
+			  cl_object s_surface, cl_object clip) {
+
+  //  printf("cl_draw_surface\n");
+
+  int w_d_x = fix(d_x), w_d_y = fix(d_y);
+  
+  SDL_Surface* w_d_surface = (SDL_Surface*)keyword_to_ptr(d_surface);
+  if(NULL == screen)
+    FAIL("cl_draw_surface needs a surface!");
+  
+  SDL_Surface* w_s_surface = ecl_to_pointer(s_surface);
+  
+  SDL_Rect offset;
+  offset.x = w_d_x;
+  offset.y = w_d_y;
+  SDL_BlitSurface(w_s_surface, NULL, w_d_surface, &offset);
+}
+ 
 int main(int argc, char **argv) {
-  int cont = 1;
+  // init SDL stuff
+  SDL_Event event;
+  SDL_Init( SDL_INIT_EVERYTHING );
+
+  TTF_Init();
+
   // init cl stuff
   cl_boot(argc, argv);
 
@@ -65,6 +116,9 @@ int main(int argc, char **argv) {
 
   // define C functions. mostly drawing stuff.
   DEFUN("draw-circle", cl_draw_circle, 5);
+  DEFUN("load-font", cl_load_font, 2);
+  DEFUN("rendertext-solid", cl_rendertext_solid, 3);
+  DEFUN("draw-surface", cl_draw_surface, 5);
 
   // prepare cl stuff
   // * prepare a function-application to call on the game loop
@@ -73,42 +127,49 @@ int main(int argc, char **argv) {
   // * load scripts
   cl_safe_eval(c_string_to_object("(load-scripts)"), Cnil, Cnil);
 
-  // init SDL stuff
-  SDL_Event event;
-  SDL_Init( SDL_INIT_EVERYTHING );
-
   screen = SDL_SetVideoMode( 640, 480, 32, SDL_SWSURFACE );
 
   // create game instance and call game.on-startup
   cl_safe_eval(c_string_to_object("(init-game)"), Cnil, Cnil);
   //cl_funcall(2, c_string_to_object("init-game"), ecl_make_pointer(screen));
 
+  //  int cont = 1;
   int frame = 0;  
   int start_ticks = -1;
-  while(cont) {
+  while(1) { // cont
     //start_ticks = SDL_GetTicks();
     
     while( SDL_PollEvent( &event ) ) {
       if(event.type == SDL_QUIT) {
-        cont = 0;
+	// quit immediatly
+	//cont = 0;
+	goto _end;
       }
     }
 
     ++frame;
 
+    // TODO do events
+    // ...
+    
     // this is the game loop
     // loop through all game objects and exec stuff something ...
     cl_safe_eval(run_onupdate, Cnil, Cnil);
 
-    // draw all stuff
+
+    // clear screen
     SDL_FillRect(screen, &screen->clip_rect, SDL_MapRGB(screen->format, 0x00, 0x00, 0x00));
 
+    // draw all stuff
     cl_safe_eval(run_ondraw, Cnil, Cnil);
 
     SDL_Flip( screen );
 
-    //printf("%f\n", (float)frame / (float)SDL_GetTicks() * 1000);
+    // TODO do frame rate adjustments
+    
   }
+
+ _end:
 
   // do we really need to release stuff? fuck it
   //SDL_Quit();

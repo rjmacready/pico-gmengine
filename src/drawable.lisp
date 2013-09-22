@@ -3,19 +3,24 @@
 (defmethod on-draw ((this drawable))
   (error "(draw drawable) is not defined!"))
 
+; low level wrapper for SDL_Surface
+(defclass raw-surface (drawable)
+  ((surface :initarg :surface)))
+
+(defmethod on-draw ((this raw-surface))
+;  (print 'draw-raw-surface)
+  (with-slots (surface x y) this
+;    (print `(with slots ,x ,y ,surface))
+    (draw-surface :screen (floor x) (floor y) surface nil)))
+
 (defclass circle (drawable) 
   ((x :initarg :x) 
-   (y :initarg :y) 
+   (y :initarg :y)
    (radius :initarg :radius) 
    (color :initarg :color)))
 
 (defmethod on-draw ((this circle))
-  ;(print "draw circle")
   (with-slots (x y radius color) this
-    ;(print x)
-    ;(print y)
-    ;(print radius)
-    ;(print color)
     (draw-circle :screen (floor x) (floor y) radius color)))
 
 ;(defclass bmp-drawable (drawable)
