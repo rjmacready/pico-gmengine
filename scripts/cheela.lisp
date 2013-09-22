@@ -33,7 +33,7 @@
 	(when (> (- *time* _time) 1)
 	  (progn 
 	    (setf _i (random (1- (length *actions*))))
-	    (print _i)
+;	    (print _i)
 
 	    (funcall (nth _i *actions*) this)
 	    ;(setf _i (mod (1+ _i) 4))

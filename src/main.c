@@ -100,6 +100,10 @@ cl_object cl_draw_surface(cl_object d_surface, cl_object d_x, cl_object d_y,
   offset.y = w_d_y;
   SDL_BlitSurface(w_s_surface, NULL, w_d_surface, &offset);
 }
+
+cl_object cl_get_ticks() {
+  return MAKE_FIXNUM(SDL_GetTicks());
+}
  
 int main(int argc, char **argv) {
   // init SDL stuff
@@ -119,6 +123,7 @@ int main(int argc, char **argv) {
   DEFUN("load-font", cl_load_font, 2);
   DEFUN("rendertext-solid", cl_rendertext_solid, 3);
   DEFUN("draw-surface", cl_draw_surface, 5);
+  DEFUN("get-ticks", cl_get_ticks, 0);
 
   // prepare cl stuff
   // * prepare a function-application to call on the game loop
