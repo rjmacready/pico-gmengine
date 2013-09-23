@@ -1,6 +1,6 @@
 (print "loading cheela")
 
-(defclass cheela (game-object circle)
+(defclass cheela (game-object circle physical)
   ((_time :initform nil)
    (_i :initform 0)))
 

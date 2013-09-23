@@ -1,6 +1,7 @@
 (print "loading game")
 
 (load "/home/user/mini-game-engine/scripts/cheela.lisp")
+(load "/home/user/mini-game-engine/scripts/square.lisp")
 
 (defparameter *deja-vu-sans* nil)
 (defparameter *text* nil)
@@ -16,6 +17,7 @@
   
   (with-slots (game-objects) this
     (push *text* game-objects)
+    (push (make-instance 'block :x 50 :y 50 :width 20 :height 20) game-objects)
     (push (make-instance 'cheela :x 10 :y 10 :radius 10 :color 255) game-objects))
 
   (print "Added a cheela to game.")

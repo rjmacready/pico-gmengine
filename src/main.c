@@ -82,6 +82,34 @@ cl_object cl_draw_circle(cl_object surface,
   draw_circle(screen, w_x, w_y, w_radius, w_color);
 }
 
+cl_object cl_get_color(cl_object r, cl_object g, cl_object b) {
+  
+  Uint32 color = SDL_MapRGB(screen->format, (Uint8)fix(r), (Uint8)fix(g), (Uint8)fix(b));
+  return MAKE_FIXNUM(color);
+} 
+
+cl_object cl_draw_rect(cl_object d_surface, 
+		       cl_object d_x, cl_object d_y,
+		       cl_object d_w, cl_object d_h,
+		       cl_object s_color) 
+{
+  int w_d_x = fix(d_x), w_d_y = fix(d_y), w_d_w = fix(d_w), w_d_h = fix(d_h);
+  
+  SDL_Surface* w_d_surface = (SDL_Surface*)keyword_to_ptr(d_surface);
+  if(NULL == screen)
+    FAIL("cl_draw_surface needs a surface!");
+  
+  SDL_Rect clip;
+  clip.x = w_d_x;
+  clip.y = w_d_y;
+  clip.w = w_d_w;
+  clip.h = w_d_h;
+  
+  SDL_FillRect(w_d_surface, &clip, (Uint32)fix(s_color));
+
+  return MAKE_FIXNUM(1);
+}
+
 cl_object cl_draw_surface(cl_object d_surface, cl_object d_x, cl_object d_y,
 			  cl_object s_surface, cl_object clip) {
 
@@ -99,6 +127,8 @@ cl_object cl_draw_surface(cl_object d_surface, cl_object d_x, cl_object d_y,
   offset.x = w_d_x;
   offset.y = w_d_y;
   SDL_BlitSurface(w_s_surface, NULL, w_d_surface, &offset);
+
+  return MAKE_FIXNUM(1);
 }
 
 cl_object cl_get_ticks() {
@@ -124,6 +154,8 @@ int main(int argc, char **argv) {
   DEFUN("rendertext-solid", cl_rendertext_solid, 3);
   DEFUN("draw-surface", cl_draw_surface, 5);
   DEFUN("get-ticks", cl_get_ticks, 0);
+  DEFUN("get-color", cl_get_color, 3);
+  DEFUN("draw-rect", cl_draw_rect, 6);
 
   // prepare cl stuff
   // * prepare a function-application to call on the game loop

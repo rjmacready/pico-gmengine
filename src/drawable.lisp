@@ -23,9 +23,13 @@
   (with-slots (x y radius color) this
     (draw-circle :screen (floor x) (floor y) radius color)))
 
-;(defclass bmp-drawable (drawable)
-;  ((bitmap-name)))
+(defclass square (drawable)
+  ((x :initarg :x)
+   (y :initarg :y)
+   (height :initarg :height)
+   (width :initarg :width)
+   (color :initarg :color)))
 
-;(defmethod draw ((this bmp-drawable))
-;  nil)
-
+(defmethod on-draw ((this square))
+  (with-slots (x y height width color) this
+    (draw-rect :screen (floor x) (floor y) (floor width) (floor height) color)))
